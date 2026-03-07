@@ -349,7 +349,13 @@
     <button class="run-btn" id="newsBtn" onclick="fetchAllFeeds()">Pull News</button>
     <button class="run-btn secondary" id="calBtn" onclick="toggleCalendar()">Economic Calendar</button>
   </div>
-  <button class="run-btn" id="fedBtn" onclick="fetchFedWatch()" style="background:#1a3a5c;border:1px solid var(--gold);">Fed Watch</button>
+  <div class="btn-row">
+    <button class="run-btn" id="fedBtn" onclick="fetchFedWatch()" style="background:#1a3a5c;border:1px solid var(--gold);">Fed Watch</button>
+    <a href="https://alisdairmacdonald.substack.com" target="_blank" 
+       style="flex:1;display:block;background:var(--ink);color:var(--gold);text-align:center;padding:12px 8px;border-radius:2px;text-decoration:none;font-family:'Playfair Display',serif;font-size:0.85rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border:1px solid var(--gold);">
+      Newsletter →
+    </a>
+  </div>
   <div class="filter-row">
     <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
     <button class="filter-btn" onclick="setFilter('central-banks', this)">Central Banks</button>
