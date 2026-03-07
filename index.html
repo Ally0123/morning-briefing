@@ -1,0 +1,599 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Morning Briefing</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap');
+
+  :root {
+    --ink: #0e1a2b;
+    --paper: #f5f0e8;
+    --cream: #ede8db;
+    --rule: #c8b89a;
+    --accent: #1a3a5c;
+    --muted: #4a5a6e;
+    --card: #faf7f2;
+    --gold: #c8a84b;
+    --green: #2d6a2d;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-weight: 300;
+    min-height: 100vh;
+    padding: 0 0 80px 0;
+  }
+
+  .masthead {
+    background: var(--ink);
+    color: var(--paper);
+    text-align: center;
+    padding: 18px 20px 14px;
+    border-bottom: 3px solid var(--gold);
+  }
+
+  .masthead h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 5vw, 2rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .dateline {
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-top: 4px;
+  }
+
+  .controls {
+    background: var(--cream);
+    border-bottom: 1px solid var(--rule);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-row { display: flex; gap: 8px; }
+
+  .run-btn {
+    flex: 1;
+    background: var(--accent);
+    color: var(--paper);
+    border: none;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 12px 8px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.2s;
+  }
+
+  .run-btn:hover { background: #0e2540; }
+  .run-btn:disabled { background: var(--muted); cursor: not-allowed; }
+
+  .run-btn.secondary {
+    background: var(--ink);
+    border: 1px solid var(--gold);
+  }
+
+  .run-btn.secondary:hover { background: #0e2540; }
+
+  .filter-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .filter-btn {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    color: var(--muted);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--gold);
+    color: var(--paper);
+  }
+
+  .status-bar {
+    background: var(--ink);
+    color: var(--gold);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-align: center;
+    padding: 8px;
+    text-transform: uppercase;
+    display: none;
+  }
+
+  .status-bar.visible { display: block; }
+
+  .content-area {
+    padding: 16px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .feed-section { margin-bottom: 24px; }
+
+  .section-rule {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 12px;
+  }
+
+  .section-rule span {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .section-rule::before,
+  .section-rule::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .news-items { display: flex; flex-direction: column; gap: 8px; }
+
+  .news-item {
+    background: var(--card);
+    border-left: 3px solid var(--rule);
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .news-item:hover { border-left-color: var(--gold); }
+  .news-item .headline { font-weight: 400; color: var(--ink); margin-bottom: 3px; }
+
+  .news-item .summary {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+    line-height: 1.4;
+    display: none;
+  }
+
+  .news-item.expanded .summary { display: block; }
+  .news-item .meta { font-size: 0.68rem; color: var(--rule); letter-spacing: 0.04em; }
+
+  .news-item .read-more {
+    font-size: 0.68rem;
+    color: var(--gold);
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 4px;
+  }
+
+  .cal-items { display: flex; flex-direction: column; gap: 8px; margin-bottom: 24px; }
+
+  .cal-item {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 10px 12px;
+    display: flex;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .cal-time {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.78rem;
+    color: var(--muted);
+    min-width: 52px;
+    padding-top: 2px;
+    text-align: center;
+  }
+
+  .cal-body { flex: 1; }
+  .cal-currency { font-size: 0.68rem; letter-spacing: 0.1em; text-transform: uppercase; color: var(--muted); margin-bottom: 2px; }
+  .cal-name { font-size: 0.88rem; color: var(--ink); margin-bottom: 4px; }
+
+  .cal-data {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+    font-size: 0.72rem;
+    color: var(--muted);
+  }
+
+  .cal-data strong { color: var(--ink); }
+
+  .cal-impact {
+    font-size: 0.6rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 2px 6px;
+    border-radius: 2px;
+    font-weight: 600;
+    white-space: nowrap;
+  }
+
+  .cal-impact.high { background: #e8eef5; color: var(--accent); }
+  .cal-impact.medium { background: #fdf5e0; color: #7a5c00; }
+
+  .placeholder {
+    color: var(--muted);
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+    font-size: 0.85rem;
+  }
+
+  .fed-card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 12px;
+  }
+
+  .fed-card .fed-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .fed-card .fed-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .fed-card .fed-sub {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .fed-bar {
+    grid-column: 1 / -1;
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 12px;
+  }
+
+  .fed-bar .fed-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .prob-row {
+    display: flex;
+    gap: 8px;
+    margin-top: 6px;
+  }
+
+  .prob-item {
+    flex: 1;
+    text-align: center;
+    padding: 8px 4px;
+    border-radius: 2px;
+    border: 1px solid var(--rule);
+  }
+
+  .prob-item .prob-pct {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.1rem;
+    font-weight: 600;
+  }
+
+  .prob-item .prob-label {
+    font-size: 0.65rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .prob-cut { background: #e8eef5; }
+  .prob-cut .prob-pct { color: var(--accent); }
+  .prob-hold { background: #fdf5e0; }
+  .prob-hold .prob-pct { color: #7a5c00; }
+  .prob-hike { background: #faf7f2; }
+  .prob-hike .prob-pct { color: var(--muted); }
+
+  .count-badge {
+    background: var(--gold);
+    color: var(--ink);
+    font-size: 0.6rem;
+    padding: 1px 5px;
+    border-radius: 8px;
+    margin-left: 4px;
+    vertical-align: middle;
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="dateline" id="dateline"></div>
+  <h1>Morning Briefing</h1>
+</div>
+
+<div class="controls">
+  <div class="btn-row">
+    <button class="run-btn" id="newsBtn" onclick="fetchAllFeeds()">Pull News</button>
+    <button class="run-btn secondary" id="calBtn" onclick="toggleCalendar()">Economic Calendar</button>
+  </div>
+  <button class="run-btn" id="fedBtn" onclick="fetchFedWatch()" style="background:#1a3a5c;border:1px solid var(--gold);">Fed Watch</button>
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+    <button class="filter-btn" onclick="setFilter('central-banks', this)">Central Banks</button>
+    <button class="filter-btn" onclick="setFilter('markets', this)">Markets</button>
+    <button class="filter-btn" onclick="setFilter('geopolitics', this)">Geopolitics</button>
+  </div>
+</div>
+
+<div class="status-bar" id="statusBar">Fetching...</div>
+
+<div class="content-area">
+  <div id="fedSection" style="display:none;margin-bottom:24px;">
+    <div class="section-rule"><span>Fed Watch</span></div>
+    <div id="fedContent" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+  </div>
+
+  <div id="calendarSection" style="display:none;margin-bottom:24px;">
+    <div class="section-rule"><span>Economic Calendar</span></div>
+    <div style="display:flex;flex-direction:column;gap:8px;">
+      <a href="https://www.myfxbook.com/forex-economic-calendar" target="_blank"
+         style="display:block;background:var(--accent);color:var(--paper);text-align:center;padding:14px;border-radius:2px;text-decoration:none;font-family:'Playfair Display',serif;font-size:0.9rem;letter-spacing:0.08em;text-transform:uppercase;border:1px solid var(--gold);">
+        Open Myfxbook Calendar →
+      </a>
+      <a href="https://www.forexfactory.com/calendar" target="_blank"
+         style="display:block;background:var(--ink);color:var(--paper);text-align:center;padding:14px;border-radius:2px;text-decoration:none;font-family:'Playfair Display',serif;font-size:0.9rem;letter-spacing:0.08em;text-transform:uppercase;border:1px solid var(--gold);">
+        Open ForexFactory Calendar →
+      </a>
+      <a href="https://www.investing.com/economic-calendar/" target="_blank"
+         style="display:block;background:var(--ink);color:var(--paper);text-align:center;padding:14px;border-radius:2px;text-decoration:none;font-family:'Playfair Display',serif;font-size:0.9rem;letter-spacing:0.08em;text-transform:uppercase;border:1px solid var(--gold);">
+        Open Investing.com Calendar →
+      </a>
+    </div>
+  </div>
+  <div id="contentArea">
+    <div class="placeholder">Tap Pull News to load your morning feeds.</div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('dateline').textContent = new Date().toLocaleDateString('en-GB', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  const FEEDS = [
+    { name: 'Federal Reserve', url: 'https://www.federalreserve.gov/feeds/press_all.xml', category: 'central-banks' },
+    { name: 'ECB', url: 'https://www.ecb.europa.eu/rss/press.html', category: 'central-banks' },
+    { name: 'Bank of England', url: 'https://www.bankofengland.co.uk/rss/news', category: 'central-banks' },
+    { name: 'Exante Data', url: 'https://moneyinsideout.substack.com/feed', category: 'markets' },
+    { name: 'Investing.com', url: 'https://www.investing.com/rss/news.rss', category: 'markets' },
+    { name: 'Yahoo Finance', url: 'https://finance.yahoo.com/news/rssindex', category: 'markets' },
+    { name: 'CNBC Markets', url: 'https://www.cnbc.com/id/20910258/device/rss/rss.html', category: 'markets' },
+    { name: 'AP World News', url: 'https://feeds.apnews.com/rss/apf-worldnews', category: 'geopolitics' },
+    { name: 'AP Politics', url: 'https://feeds.apnews.com/rss/apf-politics', category: 'geopolitics' },
+    { name: 'Al Jazeera', url: 'https://www.aljazeera.com/xml/rss/all.xml', category: 'geopolitics' },
+  ];
+
+  let allItems = [];
+  let currentFilter = 'all';
+
+  function setStatus(msg, visible = true) {
+    const bar = document.getElementById('statusBar');
+    bar.textContent = msg;
+    bar.className = visible ? 'status-bar visible' : 'status-bar';
+  }
+
+  function setFilter(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderFiltered();
+  }
+
+  function parseRSS(xmlText) {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(xmlText, 'text/xml');
+      const items = Array.from(doc.querySelectorAll('item'));
+      if (!items.length) return [];
+      return items.slice(0, 8).map(item => ({
+        title: item.querySelector('title')?.textContent?.trim() || 'Untitled',
+        summary: (item.querySelector('description')?.textContent || '')
+          .replace(/<[^>]*>/g, '').replace(/&amp;/g,'&').replace(/&lt;/g,'<').replace(/&gt;/g,'>').trim().slice(0, 240),
+        link: item.querySelector('link')?.textContent?.trim() || '',
+        pubDate: item.querySelector('pubDate')?.textContent?.trim()
+          || item.querySelector('updated')?.textContent?.trim() || ''
+      }));
+    } catch(e) { return []; }
+  }
+
+  async function fetchFeed(feed) {
+    const proxies = [
+      `https://api.allorigins.win/get?url=${encodeURIComponent(feed.url)}`,
+      `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(feed.url)}`,
+    ];
+
+    for (const proxyUrl of proxies) {
+      try {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        const res = await fetch(proxyUrl, { signal: controller.signal });
+        clearTimeout(timeout);
+        if (!res.ok) continue;
+
+        let xmlText;
+        if (proxyUrl.includes('allorigins')) {
+          const json = await res.json();
+          xmlText = json.contents;
+        } else {
+          xmlText = await res.text();
+        }
+
+        if (!xmlText || xmlText.length < 100) continue;
+        const parsed = parseRSS(xmlText);
+        if (!parsed.length) continue;
+
+        return parsed.map(item => ({
+          ...item,
+          source: feed.name,
+          category: feed.category,
+          time: item.pubDate ? (() => {
+            try {
+              return new Date(item.pubDate).toLocaleString('en-GB', {
+                weekday: 'short', day: 'numeric', month: 'short',
+                hour: '2-digit', minute: '2-digit'
+              });
+            } catch(e) { return item.pubDate; }
+          })() : '',
+          timestamp: item.pubDate ? new Date(item.pubDate).getTime() || 0 : 0
+        }));
+      } catch(e) {
+        console.warn(`${feed.name}: ${e.message}`);
+      }
+    }
+    return [];
+  }
+
+  function renderFiltered() {
+    const area = document.getElementById('contentArea');
+    const filtered = currentFilter === 'all'
+      ? allItems : allItems.filter(i => i.category === currentFilter);
+
+    if (!filtered.length) {
+      area.innerHTML = '<div class="placeholder">No items for this filter.</div>';
+      return;
+    }
+
+    const grouped = {};
+    filtered.forEach(item => {
+      if (!grouped[item.source]) grouped[item.source] = [];
+      grouped[item.source].push(item);
+    });
+
+    area.innerHTML = Object.entries(grouped).map(([source, items]) => `
+      <div class="feed-section">
+        <div class="section-rule">
+          <span>${source}<span class="count-badge">${items.length}</span></span>
+        </div>
+        <div class="news-items">
+          ${items.map(item => `
+            <div class="news-item" onclick="this.classList.toggle('expanded')">
+              <div class="headline">${item.title}</div>
+              ${item.summary ? `<div class="summary">${item.summary}</div>` : ''}
+              <div class="meta">${item.time}</div>
+              ${item.link ? `<a class="read-more" href="${item.link}" target="_blank" onclick="event.stopPropagation()">Read full story →</a>` : ''}
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function fetchAllFeeds() {
+    const btn = document.getElementById('newsBtn');
+    btn.disabled = true;
+    btn.textContent = 'Fetching...';
+    setStatus('Fetching news feeds...');
+    document.getElementById('contentArea').innerHTML =
+      '<div class="placeholder">Loading feeds — this may take a few seconds...</div>';
+
+    allItems = [];
+    const results = await Promise.all(FEEDS.map(fetchFeed));
+    results.forEach(items => allItems.push(...items));
+    allItems.sort((a, b) => b.timestamp - a.timestamp);
+
+    setStatus('', false);
+
+    if (!allItems.length) {
+      document.getElementById('contentArea').innerHTML =
+        '<div class="placeholder">Could not load any feeds. Check your connection and try again.</div>';
+    } else {
+      renderFiltered();
+    }
+
+    btn.disabled = false;
+    btn.textContent = 'Refresh News';
+  }
+
+  function toggleCalendar() {
+    const section = document.getElementById('calendarSection');
+    const btn = document.getElementById('calBtn');
+    if (section.style.display === 'none') {
+      section.style.display = 'block';
+      btn.textContent = 'Hide Calendar';
+    } else {
+      section.style.display = 'none';
+      btn.textContent = 'Economic Calendar';
+    }
+  }
+  function fetchFedWatch() {
+    const fedSection = document.getElementById('fedSection');
+    const fedContent = document.getElementById('fedContent');
+    fedSection.style.display = 'block';
+
+    // Current Fed data — updated after each FOMC meeting
+    const targetRange = '4.25% – 4.50%';
+    const nextMeeting = 'March 18–19, 2026';
+    const daysUntil = Math.ceil((new Date('2026-03-18') - new Date()) / (1000 * 60 * 60 * 24));
+
+    fedContent.innerHTML = `
+      <div class="fed-card">
+        <div class="fed-label">Current Target Range</div>
+        <div class="fed-value">${targetRange}</div>
+        <div class="fed-sub">Set January 2026</div>
+      </div>
+      <div class="fed-card">
+        <div class="fed-label">Next FOMC Meeting</div>
+        <div class="fed-value" style="font-size:0.9rem;margin-top:4px">${nextMeeting}</div>
+        <div class="fed-sub">${daysUntil > 0 ? daysUntil + ' days away' : 'Today'}</div>
+      </div>
+      <div class="fed-bar" style="grid-column:1/-1">
+        <div class="fed-label">Live Probabilities</div>
+        <a href="https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html" 
+           target="_blank" 
+           style="display:block;margin-top:8px;background:var(--accent);color:var(--paper);text-align:center;padding:12px;border-radius:2px;text-decoration:none;font-family:'Playfair Display',serif;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase;border:1px solid var(--gold);">
+          Open CME FedWatch Tool →
+        </a>
+        <div style="font-size:0.72rem;color:var(--muted);margin-top:8px;text-align:center;">
+          Opens live CME probabilities for cut, hold, and hike
+        </div>
+      </div>
+    `;
+
+    document.getElementById('fedBtn').textContent = 'Refresh Fed Watch';
+  }
+</script>
+</body>
+</html>
