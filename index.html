@@ -1,0 +1,583 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<title>Morning Briefing</title>
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-CZHDNBP96B"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+  gtag('config', 'G-CZHDNBP96B');
+</script>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@400;600;700&family=Source+Serif+4:ital,wght@0,300;0,400;1,300&display=swap');
+
+  :root {
+    --ink: #0e1a2b;
+    --paper: #f5f0e8;
+    --cream: #ede8db;
+    --rule: #c8b89a;
+    --accent: #1a3a5c;
+    --muted: #4a5a6e;
+    --card: #faf7f2;
+    --gold: #c8a84b;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'Source Serif 4', Georgia, serif;
+    font-weight: 300;
+    min-height: 100vh;
+    padding: 0 0 80px 0;
+  }
+
+  .masthead {
+    background: var(--ink);
+    color: var(--paper);
+    text-align: center;
+    padding: 18px 20px 14px;
+    border-bottom: 3px solid var(--gold);
+  }
+
+  .masthead h1 {
+    font-family: 'Playfair Display', serif;
+    font-size: clamp(1.4rem, 5vw, 2rem);
+    font-weight: 700;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+  }
+
+  .dateline {
+    font-size: 0.72rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-top: 4px;
+  }
+
+  .controls {
+    background: var(--cream);
+    border-bottom: 1px solid var(--rule);
+    padding: 16px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+
+  .btn-row { display: flex; gap: 8px; }
+
+  .run-btn {
+    flex: 1;
+    background: var(--accent);
+    color: var(--paper);
+    border: none;
+    font-family: 'Playfair Display', serif;
+    font-size: 0.85rem;
+    font-weight: 600;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 12px 8px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: background 0.2s;
+  }
+
+  .run-btn:hover { background: #0e2540; }
+  .run-btn:disabled { background: var(--muted); cursor: not-allowed; }
+  .run-btn.secondary { background: var(--ink); border: 1px solid var(--gold); }
+
+  .filter-row { display: flex; flex-wrap: wrap; gap: 6px; }
+
+  .filter-btn {
+    background: var(--paper);
+    border: 1px solid var(--rule);
+    color: var(--muted);
+    font-size: 0.68rem;
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    padding: 5px 10px;
+    cursor: pointer;
+    border-radius: 2px;
+    transition: all 0.15s;
+  }
+
+  .filter-btn.active {
+    background: var(--accent);
+    border-color: var(--gold);
+    color: var(--paper);
+  }
+
+  .status-bar {
+    background: var(--ink);
+    color: var(--gold);
+    font-size: 0.72rem;
+    letter-spacing: 0.1em;
+    text-align: center;
+    padding: 8px;
+    text-transform: uppercase;
+    display: none;
+  }
+
+  .status-bar.visible { display: block; }
+
+  .content-area {
+    padding: 16px;
+    max-width: 800px;
+    margin: 0 auto;
+  }
+
+  .feed-section { margin-bottom: 24px; }
+
+  .section-rule {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 0 0 12px;
+  }
+
+  .section-rule span {
+    font-family: 'Playfair Display', serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .section-rule::before,
+  .section-rule::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--rule);
+  }
+
+  .news-items { display: flex; flex-direction: column; gap: 8px; }
+
+  .news-item {
+    background: var(--card);
+    border-left: 3px solid var(--rule);
+    padding: 10px 14px;
+    font-size: 0.85rem;
+    line-height: 1.5;
+    cursor: pointer;
+    transition: border-color 0.15s;
+  }
+
+  .news-item:hover { border-left-color: var(--gold); }
+  .news-item .headline { font-weight: 400; color: var(--ink); margin-bottom: 3px; }
+
+  .news-item .summary {
+    font-size: 0.78rem;
+    color: var(--muted);
+    margin-bottom: 4px;
+    line-height: 1.4;
+    display: none;
+  }
+
+  .news-item.expanded .summary { display: block; }
+  .news-item .meta { font-size: 0.68rem; color: var(--rule); letter-spacing: 0.04em; }
+
+  .news-item .read-more {
+    font-size: 0.68rem;
+    color: var(--gold);
+    text-decoration: none;
+    display: inline-block;
+    margin-top: 4px;
+  }
+
+  .fed-card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 12px;
+  }
+
+  .fed-card .fed-label {
+    font-size: 0.68rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .fed-card .fed-value {
+    font-family: 'Playfair Display', serif;
+    font-size: 1.2rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .fed-card .fed-sub {
+    font-size: 0.72rem;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  .placeholder {
+    color: var(--muted);
+    font-style: italic;
+    text-align: center;
+    padding: 20px;
+    font-size: 0.85rem;
+  }
+
+  .ticker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .ticker-card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    text-decoration: none;
+    display: block;
+  }
+
+  .ticker-card:hover { border-color: var(--gold); }
+
+  .ticker-symbol {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .ticker-name {
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ticker-label {
+    font-size: 0.68rem;
+    color: var(--gold);
+    margin-top: 4px;
+    letter-spacing: 0.04em;
+  }
+</style>
+</head>
+<body>
+
+<div class="masthead">
+  <div class="dateline" id="dateline"></div>
+  <h1>Morning Briefing</h1>
+</div>
+
+<div class="controls">
+  <div class="btn-row">
+    <button class="run-btn" id="newsBtn" onclick="fetchAllFeeds()">Pull News</button>
+    <button class="run-btn secondary" id="calBtn" onclick="toggleCalendar()">Economic Calendar</button>
+  </div>
+  <div class="btn-row">
+    <button class="run-btn" id="fedBtn" onclick="fetchFedWatch()" style="background:#1a3a5c;border:1px solid var(--gold);">Fed Watch</button>
+    <a href="https://alisdairmacdonald.substack.com" target="_blank"
+       style="flex:1;display:block;background:var(--ink);color:var(--gold);text-align:center;padding:12px 8px;border-radius:2px;text-decoration:none;font-family:'Playfair Display',serif;font-size:0.85rem;font-weight:600;letter-spacing:0.08em;text-transform:uppercase;border:1px solid var(--gold);">
+      Newsletter &rarr;
+    </a>
+  </div>
+  <div class="btn-row">
+    <button class="run-btn" id="trendingBtn" onclick="fetchTrending()" style="background:#1a3a5c;border:1px solid var(--gold);">Pre-Market Gainers</button>
+    <button class="run-btn" id="analyseBtn" onclick="analyseHeadlines()" style="background:#c8a84b;color:#0e1a2b;border:1px solid #c8a84b;font-weight:700;">ChatGPT Analysis</button>
+  </div>
+
+  <div class="filter-row">
+    <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
+    <button class="filter-btn" onclick="setFilter('central-banks', this)">Central Banks</button>
+    <button class="filter-btn" onclick="setFilter('markets', this)">Markets</button>
+    <button class="filter-btn" onclick="setFilter('geopolitics', this)">Geopolitics</button>
+    <button class="filter-btn" onclick="setFilter('newsletter', this)">Newsletter</button>
+  </div>
+</div>
+
+<div class="status-bar" id="statusBar">Fetching...</div>
+
+<div class="content-area">
+
+  <div id="trendingSection" style="display:none;margin-bottom:24px;">
+    <div class="section-rule"><span>Pre-Market Gainers</span></div>
+    <div id="trendingContent" class="ticker-grid"></div>
+  </div>
+
+  <div id="fedSection" style="display:none;margin-bottom:24px;">
+    <div class="section-rule"><span>Fed Watch</span></div>
+    <div id="fedContent" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
+  </div>
+
+  <div id="calendarSection" style="display:none;margin-bottom:24px;">
+    <div class="section-rule"><span>Economic Calendar</span></div>
+    <a href="https://www.investing.com/economic-calendar/" target="_blank"
+       style="display:block;background:var(--accent);color:var(--paper);text-align:center;padding:14px;border-radius:2px;text-decoration:none;font-family:'Playfair Display',serif;font-size:0.9rem;letter-spacing:0.08em;text-transform:uppercase;border:1px solid var(--gold);">
+      Open Economic Calendar &rarr;
+    </a>
+  </div>
+
+  <div id="contentArea">
+    <div class="placeholder">Tap Pull News to load your morning feeds.</div>
+  </div>
+</div>
+
+<script>
+  document.getElementById('dateline').textContent = new Date().toLocaleDateString('en-GB', {
+    weekday: 'long', day: 'numeric', month: 'long', year: 'numeric'
+  });
+
+  const FEEDS = [
+    { name: 'Federal Reserve', url: 'https://www.federalreserve.gov/feeds/press_all.xml', category: 'central-banks' },
+    { name: 'ECB', url: 'https://www.ecb.europa.eu/rss/press.html', category: 'central-banks' },
+    { name: 'Bank of England', url: 'https://www.bankofengland.co.uk/rss/news', category: 'central-banks' },
+    { name: 'Financial Stability Board', url: 'https://www.fsb.org/feed', category: 'central-banks' },
+    { name: 'Exante Data', url: 'https://moneyinsideout.substack.com/feed', category: 'markets' },
+    { name: 'Investing.com', url: 'https://www.investing.com/rss/news.rss', category: 'markets' },
+    { name: 'Yahoo Finance', url: 'https://finance.yahoo.com/news/rssindex', category: 'markets' },
+    { name: 'CNBC Markets', url: 'https://www.cnbc.com/id/20910258/device/rss/rss.html', category: 'markets' },
+    { name: 'Financial Times', url: 'https://ft.com/rss/home', category: 'markets' },
+    { name: 'Nasdaq', url: 'https://www.nasdaq.com/feed/nasdaq-originals/rss.xml', category: 'markets' },
+    { name: 'Benzinga', url: 'https://feeds.benzinga.com/benzinga', category: 'markets' },
+    { name: 'Newsquawk', url: 'https://newsquawk.com/blog/feed.rss', category: 'markets' },
+    { name: 'AP World News', url: 'https://feeds.apnews.com/rss/apf-worldnews', category: 'geopolitics' },
+    { name: 'AP Politics', url: 'https://feeds.apnews.com/rss/apf-politics', category: 'geopolitics' },
+    { name: 'Al Jazeera', url: 'https://www.aljazeera.com/xml/rss/all.xml', category: 'geopolitics' },
+    { name: 'Foreign Affairs', url: 'https://foreignaffairs.com/rss.xml', category: 'geopolitics' },
+    { name: 'War on the Rocks', url: 'https://warontherocks.com/feed', category: 'geopolitics' },
+    { name: 'The Independent', url: 'https://www.independent.co.uk/news/world/politics/rss', category: 'geopolitics' },
+    { name: 'OilPrice.com', url: 'https://oilprice.com/rss/main', category: 'geopolitics' },
+    { name: 'Alisdair Macdonald', url: 'https://alisdairmacdonald.substack.com/feed', category: 'newsletter' },
+  ];
+
+  const FALLBACK_TICKERS = [
+    { symbol: 'SPY',  title: 'S&P 500 ETF' },
+    { symbol: 'QQQ',  title: 'Nasdaq 100 ETF' },
+    { symbol: 'AAPL', title: 'Apple' },
+    { symbol: 'TSLA', title: 'Tesla' },
+    { symbol: 'NVDA', title: 'Nvidia' },
+    { symbol: 'AMZN', title: 'Amazon' },
+    { symbol: 'MSFT', title: 'Microsoft' },
+    { symbol: 'META', title: 'Meta Platforms' },
+    { symbol: 'GOOGL', title: 'Alphabet' },
+    { symbol: 'AMD',  title: 'AMD' },
+    { symbol: 'PLTR', title: 'Palantir' },
+    { symbol: 'NFLX', title: 'Netflix' },
+  ];
+
+  let allItems = [];
+  let currentFilter = 'all';
+
+  function setStatus(msg, visible = true) {
+    const bar = document.getElementById('statusBar');
+    bar.textContent = msg;
+    bar.className = visible ? 'status-bar visible' : 'status-bar';
+  }
+
+  function setFilter(filter, btn) {
+    currentFilter = filter;
+    document.querySelectorAll('.filter-btn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderFiltered();
+  }
+
+  function parseRSS(xmlText) {
+    try {
+      const parser = new DOMParser();
+      const doc = parser.parseFromString(xmlText, 'text/xml');
+      const items = Array.from(doc.querySelectorAll('item'));
+      return items.slice(0, 8).map(item => ({
+        title: item.querySelector('title')?.textContent?.trim() || 'Untitled',
+        summary: (item.querySelector('description')?.textContent || '').replace(/<[^>]*>/g, '').trim().slice(0, 240),
+        link: item.querySelector('link')?.textContent?.trim() || '',
+        pubDate: item.querySelector('pubDate')?.textContent || ''
+      }));
+    } catch(e) { return []; }
+  }
+
+  async function fetchFeed(feed) {
+    const proxies = [
+      'https://api.allorigins.win/get?url=',
+      'https://api.codetabs.com/v1/proxy?quest=',
+      'https://corsproxy.io/?',
+    ];
+    for (const proxy of proxies) {
+      try {
+        const url = proxy + encodeURIComponent(feed.url) + '&timestamp=' + Date.now();
+        const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+        const text = await res.text();
+        let xml = text;
+        try {
+          const json = JSON.parse(text);
+          if (json.contents) xml = json.contents;
+        } catch(e) {}
+        const parsed = parseRSS(xml);
+        if (parsed.length > 0) {
+          return parsed.map(item => ({
+            ...item,
+            source: feed.name,
+            category: feed.category,
+            timestamp: new Date(item.pubDate).getTime() || 0
+          }));
+        }
+      } catch(e) { continue; }
+    }
+    return [];
+  }
+
+  function renderTickers(symbols, isFallback) {
+    const content = document.getElementById('trendingContent');
+    content.innerHTML = symbols.map(s => {
+      const changeColor = s.change && s.change.includes('-') ? '#ff1100' : '#00ffbb';
+      const changeDisplay = s.change ? `<div class="ticker-label" style="color:${changeColor}">${s.change}</div>` : `<div class="ticker-label">Pre-Market</div>`;
+      const link = s.change ? `https://finviz.com/quote.ashx?t=${s.symbol}` : `https://finance.yahoo.com/quote/${s.symbol}`;
+      return `
+        <a class="ticker-card" href="${link}" target="_blank">
+          <div class="ticker-symbol">${s.symbol}</div>
+          <div class="ticker-name">${s.title || ''}</div>
+          ${changeDisplay}
+        </a>`;
+    }).join('');
+  }
+
+  async function fetchTrending() {
+    const btn = document.getElementById('trendingBtn');
+    const section = document.getElementById('trendingSection');
+    btn.textContent = 'Loading...';
+    btn.disabled = true;
+    section.style.display = 'block';
+    document.getElementById('trendingContent').innerHTML = '<div class="placeholder">Fetching pre-market gainers...</div>';
+
+    const FMP_KEY = '6hoVPhx5JJ6zXA6L32kmzpbOwUkivBQk';
+    const fmpUrl = `https://financialmodelingprep.com/api/v3/stock_market/gainers?apikey=${FMP_KEY}`;
+
+    let gainers = null;
+    try {
+      const res = await fetch(fmpUrl, { signal: AbortSignal.timeout(8000) });
+      const data = await res.json();
+      if (Array.isArray(data) && data.length > 0) {
+        gainers = data.slice(0, 15).map(s => ({
+          symbol: s.symbol,
+          title: s.name || '',
+          change: s.changesPercentage ? (s.changesPercentage > 0 ? '+' : '') + s.changesPercentage.toFixed(2) + '%' : ''
+        }));
+      }
+    } catch(e) {}
+
+    renderTickers(gainers || FALLBACK_TICKERS, !gainers);
+    btn.textContent = 'Refresh Gainers';
+    btn.disabled = false;
+  }
+
+  function renderFiltered() {
+    const area = document.getElementById('contentArea');
+    const filtered = currentFilter === 'all' ? allItems : allItems.filter(i => i.category === currentFilter);
+    if (!filtered.length) {
+      area.innerHTML = '<div class="placeholder">No items found.</div>';
+      return;
+    }
+    const grouped = {};
+    filtered.forEach(item => {
+      if (!grouped[item.source]) grouped[item.source] = [];
+      grouped[item.source].push(item);
+    });
+    area.innerHTML = Object.entries(grouped).map(([source, items]) => `
+      <div class="feed-section">
+        <div class="section-rule"><span>${source}</span></div>
+        <div class="news-items">
+          ${items.map(item => `
+            <div class="news-item" onclick="this.classList.toggle('expanded')">
+              <div class="headline">${item.title}</div>
+              <div class="summary">${item.summary}</div>
+              <a class="read-more" href="${item.link}" target="_blank">Read more &rarr;</a>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+    `).join('');
+  }
+
+  async function fetchAllFeeds() {
+    const btn = document.getElementById('newsBtn');
+    btn.textContent = 'Fetching...';
+    btn.disabled = true;
+    setStatus('Loading feeds...');
+    allItems = [];
+    const results = await Promise.all(FEEDS.map(fetchFeed));
+    results.forEach(items => allItems.push(...items));
+    allItems.sort((a, b) => b.timestamp - a.timestamp);
+    renderFiltered();
+    setStatus('', false);
+    btn.textContent = 'Refresh News';
+    btn.disabled = false;
+  }
+
+  function toggleCalendar() {
+    const sec = document.getElementById('calendarSection');
+    sec.style.display = sec.style.display === 'none' ? 'block' : 'none';
+  }
+
+  function fetchFedWatch() {
+    const fedSection = document.getElementById('fedSection');
+    const fedContent = document.getElementById('fedContent');
+    fedSection.style.display = 'block';
+    const today = new Date();
+    const fomcDates = [
+      new Date('2026-03-18'), new Date('2026-04-29'),
+      new Date('2026-06-17'), new Date('2026-07-29'),
+      new Date('2026-09-16'), new Date('2026-10-28'),
+      new Date('2026-12-09'),
+    ];
+    const nextMeeting = fomcDates.find(d => d >= today);
+    const meetingStr = nextMeeting ? nextMeeting.toLocaleDateString('en-GB', { day: 'numeric', month: 'long', year: 'numeric' }) : 'TBC';
+    const daysUntil = nextMeeting ? Math.ceil((nextMeeting - today) / (1000 * 60 * 60 * 24)) : '';
+    fedContent.innerHTML = `
+      <div class="fed-card">
+        <div class="fed-label">Current Target Range</div>
+        <div class="fed-value">4.25% – 4.50%</div>
+        <div class="fed-sub">Set January 2026</div>
+      </div>
+      <div class="fed-card">
+        <div class="fed-label">Next FOMC Meeting</div>
+        <div class="fed-value" style="font-size:0.9rem;margin-top:4px">${meetingStr}</div>
+        <div class="fed-sub">${daysUntil} days away</div>
+      </div>
+      <div style="grid-column:1/-1;background:var(--card);border:1px solid var(--rule);border-radius:2px;padding:12px;">
+        <div style="font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--muted);margin-bottom:8px;">Live Probabilities</div>
+        <a href="https://www.cmegroup.com/markets/interest-rates/cme-fedwatch-tool.html" target="_blank"
+           style="display:block;background:var(--accent);color:var(--paper);text-align:center;padding:12px;border-radius:2px;text-decoration:none;font-family:'Playfair Display',serif;font-size:0.85rem;letter-spacing:0.08em;text-transform:uppercase;border:1px solid var(--gold);">
+          Open CME FedWatch Tool &rarr;
+        </a>
+      </div>
+    `;
+    document.getElementById('fedBtn').textContent = 'Refresh Fed Watch';
+  }
+
+  function analyseHeadlines() {
+    const headlines = Array.from(document.querySelectorAll('.headline'))
+      .map(h => h.textContent.trim())
+      .filter(Boolean)
+      .slice(0, 15)
+      .join('\n');
+
+    if (!headlines) {
+      alert('Please pull news first.');
+      return;
+    }
+
+    const prompt = 'You are a seasoned financial and geopolitical analyst. Based on the following headlines, write a concise pre-session briefing in flowing prose. No bullet points, no headers, no em-dashes. Short punchy sentences. Cover what matters for traders opening their session. Be direct and analytical. Do not pad or repeat.\n\nHeadlines:\n' + headlines + '\n\nWrite the briefing now:';
+
+    window.open('https://chatgpt.com/?q=' + encodeURIComponent(prompt), '_blank');
+  }
+</script>
+</body>
+</html>
