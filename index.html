@@ -247,10 +247,7 @@
       Newsletter &rarr;
     </a>
   </div>
-  <div class="btn-row">
-    <button class="run-btn" id="analyseBtn" onclick="analyseWith('chatgpt')" style="background:#c8a84b;color:#0e1a2b;border:1px solid #c8a84b;font-weight:700;">ChatGPT Analysis</button>
-    <button class="run-btn" id="claudeBtn" onclick="analyseWith('claude')" style="background:#0e1a2b;color:#c8a84b;border:1px solid #c8a84b;font-weight:700;">Claude Analysis</button>
-  </div>
+  <button class="run-btn" id="analyseBtn" onclick="analyseHeadlines()" style="background:#c8a84b;color:#0e1a2b;border:1px solid #c8a84b;font-weight:700;">ChatGPT Analysis</button>
 
   <div class="filter-row">
     <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
@@ -466,7 +463,7 @@
     document.getElementById('fedBtn').textContent = 'Refresh Fed Watch';
   }
 
-  function analyseWith(ai) {
+  function analyseHeadlines() {
     const headlines = Array.from(document.querySelectorAll('.headline'))
       .map(h => h.textContent.trim())
       .filter(Boolean)
@@ -480,11 +477,7 @@
 
     const prompt = 'You are a seasoned financial and geopolitical analyst. Based on the following headlines, write a concise pre-session briefing in flowing prose. No bullet points, no headers, no em-dashes. Short punchy sentences. Cover what matters for traders opening their session. Be direct and analytical. Do not pad or repeat.\n\nHeadlines:\n' + headlines + '\n\nWrite the briefing now:';
 
-    if (ai === 'claude') {
-      window.open('https://claude.ai/new?q=' + encodeURIComponent(prompt), '_blank');
-    } else {
-      window.open('https://chatgpt.com/?q=' + encodeURIComponent(prompt), '_blank');
-    }
+    window.open('https://chatgpt.com/?q=' + encodeURIComponent(prompt), '_blank');
   }
 </script>
 </body>
