@@ -226,6 +226,48 @@
     padding: 20px;
     font-size: 0.85rem;
   }
+
+  .ticker-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 8px;
+    margin-top: 4px;
+  }
+
+  .ticker-card {
+    background: var(--card);
+    border: 1px solid var(--rule);
+    border-radius: 2px;
+    padding: 10px 12px;
+    cursor: pointer;
+    transition: border-color 0.15s;
+    text-decoration: none;
+  }
+
+  .ticker-card:hover { border-color: var(--gold); }
+
+  .ticker-symbol {
+    font-family: 'Playfair Display', serif;
+    font-size: 1rem;
+    font-weight: 700;
+    color: var(--ink);
+  }
+
+  .ticker-name {
+    font-size: 0.68rem;
+    color: var(--muted);
+    margin-top: 2px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+
+  .ticker-volume {
+    font-size: 0.68rem;
+    color: var(--gold);
+    margin-top: 4px;
+    letter-spacing: 0.04em;
+  }
 </style>
 </head>
 <body>
@@ -247,7 +289,10 @@
       Newsletter &rarr;
     </a>
   </div>
-  <button class="run-btn" id="analyseBtn" onclick="analyseHeadlines()" style="background:#c8a84b;color:#0e1a2b;border:1px solid #c8a84b;font-weight:700;">ChatGPT Analysis</button>
+  <div class="btn-row">
+    <button class="run-btn" id="trendingBtn" onclick="fetchTrending()" style="background:#1a3a5c;border:1px solid var(--gold);">Trending Stocks</button>
+    <button class="run-btn" id="analyseBtn" onclick="analyseHeadlines()" style="background:#c8a84b;color:#0e1a2b;border:1px solid #c8a84b;font-weight:700;">ChatGPT Analysis</button>
+  </div>
 
   <div class="filter-row">
     <button class="filter-btn active" onclick="setFilter('all', this)">All</button>
@@ -261,6 +306,12 @@
 <div class="status-bar" id="statusBar">Fetching...</div>
 
 <div class="content-area">
+
+  <div id="trendingSection" style="display:none;margin-bottom:24px;">
+    <div class="section-rule"><span>Trending on Stocktwits</span></div>
+    <div id="trendingContent" class="ticker-grid"></div>
+  </div>
+
   <div id="fedSection" style="display:none;margin-bottom:24px;">
     <div class="section-rule"><span>Fed Watch</span></div>
     <div id="fedContent" style="display:grid;grid-template-columns:1fr 1fr;gap:8px;"></div>
@@ -419,6 +470,58 @@
     renderFiltered();
     setStatus('', false);
     btn.textContent = 'Refresh News';
+    btn.disabled = false;
+  }
+
+  async function fetchTrending() {
+    const btn = document.getElementById('trendingBtn');
+    const section = document.getElementById('trendingSection');
+    const content = document.getElementById('trendingContent');
+    btn.textContent = 'Loading...';
+    btn.disabled = true;
+    section.style.display = 'block';
+    content.innerHTML = '<div class="placeholder">Fetching trending stocks...</div>';
+
+    try {
+      const proxies = [
+        'https://api.allorigins.win/get?url=',
+        'https://corsproxy.io/?',
+      ];
+
+      let data = null;
+      for (const proxy of proxies) {
+        try {
+          const url = proxy + encodeURIComponent('https://api.stocktwits.com/api/2/trending/symbols.json') + '&timestamp=' + Date.now();
+          const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+          const text = await res.text();
+          let json = text;
+          try {
+            const wrapped = JSON.parse(text);
+            if (wrapped.contents) json = wrapped.contents;
+          } catch(e) {}
+          const parsed = JSON.parse(json);
+          if (parsed.symbols && parsed.symbols.length > 0) {
+            data = parsed.symbols;
+            break;
+          }
+        } catch(e) { continue; }
+      }
+
+      if (!data) throw new Error('No data');
+
+      content.innerHTML = data.slice(0, 20).map(s => `
+        <a class="ticker-card" href="https://stocktwits.com/symbol/${s.symbol}" target="_blank">
+          <div class="ticker-symbol">${s.symbol}</div>
+          <div class="ticker-name">${s.title || ''}</div>
+          <div class="ticker-volume">Trending</div>
+        </a>
+      `).join('');
+
+    } catch(e) {
+      content.innerHTML = '<div class="placeholder">Could not load trending data. Try again.</div>';
+    }
+
+    btn.textContent = 'Refresh Trending';
     btn.disabled = false;
   }
 
