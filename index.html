@@ -4,7 +4,6 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
 <title>Morning Briefing</title>
-<!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-CZHDNBP96B"></script>
 <script>
   window.dataLayer = window.dataLayer || [];
@@ -291,16 +290,32 @@
   });
 
   const FEEDS = [
+    // Central Banks
     { name: 'Federal Reserve', url: 'https://www.federalreserve.gov/feeds/press_all.xml', category: 'central-banks' },
     { name: 'ECB', url: 'https://www.ecb.europa.eu/rss/press.html', category: 'central-banks' },
     { name: 'Bank of England', url: 'https://www.bankofengland.co.uk/rss/news', category: 'central-banks' },
+    { name: 'Financial Stability Board', url: 'https://www.fsb.org/feed', category: 'central-banks' },
+
+    // Markets
     { name: 'Exante Data', url: 'https://moneyinsideout.substack.com/feed', category: 'markets' },
     { name: 'Investing.com', url: 'https://www.investing.com/rss/news.rss', category: 'markets' },
     { name: 'Yahoo Finance', url: 'https://finance.yahoo.com/news/rssindex', category: 'markets' },
     { name: 'CNBC Markets', url: 'https://www.cnbc.com/id/20910258/device/rss/rss.html', category: 'markets' },
+    { name: 'Financial Times', url: 'https://ft.com/rss/home', category: 'markets' },
+    { name: 'Nasdaq', url: 'https://www.nasdaq.com/feed/nasdaq-originals/rss.xml', category: 'markets' },
+    { name: 'Benzinga', url: 'https://feeds.benzinga.com/benzinga', category: 'markets' },
+    { name: 'Newsquawk', url: 'https://newsquawk.com/blog/feed.rss', category: 'markets' },
+
+    // Geopolitics
     { name: 'AP World News', url: 'https://feeds.apnews.com/rss/apf-worldnews', category: 'geopolitics' },
     { name: 'AP Politics', url: 'https://feeds.apnews.com/rss/apf-politics', category: 'geopolitics' },
     { name: 'Al Jazeera', url: 'https://www.aljazeera.com/xml/rss/all.xml', category: 'geopolitics' },
+    { name: 'Foreign Affairs', url: 'https://foreignaffairs.com/rss.xml', category: 'geopolitics' },
+    { name: 'War on the Rocks', url: 'https://warontherocks.com/feed', category: 'geopolitics' },
+    { name: 'The Independent', url: 'https://www.independent.co.uk/news/world/politics/rss', category: 'geopolitics' },
+    { name: 'OilPrice.com', url: 'https://oilprice.com/rss/main', category: 'geopolitics' },
+
+    // Newsletter
     { name: 'Alisdair Macdonald', url: 'https://alisdairmacdonald.substack.com/feed', category: 'newsletter' },
   ];
 
@@ -335,7 +350,7 @@
   }
 
   async function fetchFeed(feed) {
-    const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(feed.url);
+    const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(feed.url) + '&timestamp=' + Date.now();
     try {
       const res = await fetch(proxyUrl);
       const json = await res.json();
@@ -452,3 +467,4 @@
 </script>
 </body>
 </html>
+One small improvement snuck in alongside the new feeds — the proxy URL now includes &timestamp=${Date.now()} on every request which forces a fresh fetch and avoids stale caching. Upload this to GitHub and it will deploy automatically.
