@@ -247,11 +247,9 @@
       Newsletter &rarr;
     </a>
   </div>
-  <button class="run-btn" id="analyseBtn" onclick="analyseHeadlines()" style="background:#c8a84b;color:#0e1a2b;border:1px solid #c8a84b;font-weight:700;">ChatGPT Analysis</button>
-
-  <div id="analysisSection" style="display:none;margin-top:10px;">
-    <div class="section-rule"><span>AI Briefing</span></div>
-    <div id="analysisContent" style="font-family:'Source Serif 4',serif;font-size:0.95rem;line-height:1.7;color:var(--ink);padding:16px;background:var(--card);border:1px solid var(--rule);border-radius:2px;white-space:pre-wrap;"></div>
+  <div class="btn-row">
+    <button class="run-btn" id="analyseBtn" onclick="analyseWith('chatgpt')" style="background:#c8a84b;color:#0e1a2b;border:1px solid #c8a84b;font-weight:700;">ChatGPT Analysis</button>
+    <button class="run-btn" id="claudeBtn" onclick="analyseWith('claude')" style="background:#0e1a2b;color:#c8a84b;border:1px solid #c8a84b;font-weight:700;">Claude Analysis</button>
   </div>
 
   <div class="filter-row">
@@ -350,18 +348,38 @@
   }
 
   async function fetchFeed(feed) {
-    const proxyUrl = 'https://api.allorigins.win/get?url=' + encodeURIComponent(feed.url) + '&timestamp=' + Date.now();
-    try {
-      const res = await fetch(proxyUrl);
-      const json = await res.json();
-      const parsed = parseRSS(json.contents);
-      return parsed.map(item => ({
-        ...item,
-        source: feed.name,
-        category: feed.category,
-        timestamp: new Date(item.pubDate).getTime() || 0
-      }));
-    } catch(e) { return []; }
+    const proxies = [
+      'https://api.allorigins.win/get?url=',
+      'https://api.codetabs.com/v1/proxy?quest=',
+      'https://corsproxy.io/?',
+    ];
+
+    for (const proxy of proxies) {
+      try {
+        const url = proxy + encodeURIComponent(feed.url) + '&timestamp=' + Date.now();
+        const res = await fetch(url, { signal: AbortSignal.timeout(8000) });
+        const text = await res.text();
+
+        let xml = text;
+        try {
+          const json = JSON.parse(text);
+          if (json.contents) xml = json.contents;
+        } catch(e) {}
+
+        const parsed = parseRSS(xml);
+        if (parsed.length > 0) {
+          return parsed.map(item => ({
+            ...item,
+            source: feed.name,
+            category: feed.category,
+            timestamp: new Date(item.pubDate).getTime() || 0
+          }));
+        }
+      } catch(e) {
+        continue;
+      }
+    }
+    return [];
   }
 
   function renderFiltered() {
@@ -448,7 +466,7 @@
     document.getElementById('fedBtn').textContent = 'Refresh Fed Watch';
   }
 
-  function analyseHeadlines() {
+  function analyseWith(ai) {
     const headlines = Array.from(document.querySelectorAll('.headline'))
       .map(h => h.textContent.trim())
       .filter(Boolean)
@@ -462,7 +480,11 @@
 
     const prompt = 'You are a seasoned financial and geopolitical analyst. Based on the following headlines, write a concise pre-session briefing in flowing prose. No bullet points, no headers, no em-dashes. Short punchy sentences. Cover what matters for traders opening their session. Be direct and analytical. Do not pad or repeat.\n\nHeadlines:\n' + headlines + '\n\nWrite the briefing now:';
 
-    window.open('https://chatgpt.com/?q=' + encodeURIComponent(prompt), '_blank');
+    if (ai === 'claude') {
+      window.open('https://claude.ai/new?q=' + encodeURIComponent(prompt), '_blank');
+    } else {
+      window.open('https://chatgpt.com/?q=' + encodeURIComponent(prompt), '_blank');
+    }
   }
 </script>
 </body>
